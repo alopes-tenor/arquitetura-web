@@ -5,8 +5,8 @@ import java.util.List;
 
 public interface StudentService {
     List<Student> getAllStudents();
-    Student getStudentById(int id);
-    Student createStudent(Student student);
-    Student deleteStudentById(int id);
-    Student updateStudentById(int id, Student student);
+    Student getStudentById(Long id);
+    Student createStudent(Long id, Student student);
+    Student deleteStudentById(Long id);
+    Student updateStudentById(Long id, Student student);
 }

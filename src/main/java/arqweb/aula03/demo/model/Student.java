@@ -1,12 +1,12 @@
 package arqweb.aula03.demo.model;
 
 public class Student {
-    private int id;
+    private Long id;
     private String name;
     private String register;
     private int age;
     private String course;
-    public Student(int id, String name, String register, int age, String course){
+    public Student(Long id, String name, String register, int age, String course){
         this.id = id;
         this.name = name;
         this.register = register;
@@ -14,11 +14,11 @@ public class Student {
         this.course = course;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

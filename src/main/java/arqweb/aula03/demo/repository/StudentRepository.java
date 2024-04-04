@@ -6,9 +6,7 @@ import java.util.List;
 
 public interface StudentRepository {
     List<Student> findAll();
-    Student findById(int id);
-    Student save(Student student);
-    Student delete(int id);
-
-    Student update(int id, Student student);
+    Student findById(Long id);
+    Student save(Long id, Student student);
+    Student delete(Long id);
 }
