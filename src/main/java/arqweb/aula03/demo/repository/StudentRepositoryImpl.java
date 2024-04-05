@@ -1,71 +1,70 @@
 package arqweb.aula03.demo.repository;
 
+import arqweb.aula03.demo.config.HibernateConfig;
 import org.springframework.stereotype.Repository;
-import arqweb.aula03.demo.model.Student;
-import org.springframework.jdbc.core.JdbcTemplate;
+import arqweb.aula03.demo.model.Students;
+import jakarta.persistence.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+
 import java.util.List;
 
 @Repository
 public class StudentRepositoryImpl implements StudentRepository {
-    private final JdbcTemplate jdbcTemplate;
-
-    public StudentRepositoryImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    private final SessionFactory sessionFactory;
+    public StudentRepositoryImpl() {
+        this.sessionFactory = HibernateConfig.getSessionFactory();
+    }
+    private Session getSession() {
+        return sessionFactory.getCurrentSession();
+    }
+    @Override
+    public List<Students> findAll() {
+        Session session = getSession();
+        Transaction transaction = session.beginTransaction();
+        List<Students> students = session.createQuery("FROM Students", Students.class).getResultList();
+        transaction.commit();
+        return students;
     }
 
     @Override
-    public List<Student> findAll() {
-        System.out.println("passei aqui");
-        return jdbcTemplate.query("SELECT * FROM public.students", (resultSet, rowNum) ->
-                new Student(
-                        resultSet.getLong("id"),
-                        resultSet.getString("name"),
-                        resultSet.getString("register"),
-                        resultSet.getInt("age"),
-                        resultSet.getString("course")
-                )
-        );
+    public Students findById(Long id) {
+        Session session = getSession();
+        Transaction transaction = session.beginTransaction();
+
+        Students student = session.find(Students.class, id);
+        transaction.commit();
+        return student;
     }
 
     @Override
-    public Student findById(Long id) {
-        String query = "SELECT * FROM public.students WHERE id = ?";
-
-        return jdbcTemplate.queryForObject(query, new Object[]{id}, (resultSet,  rowNum) ->
-                new Student(
-                        resultSet.getLong("id"),
-                        resultSet.getString("name"),
-                        resultSet.getString("register"),
-                        resultSet.getInt("age"),
-                        resultSet.getString("course")
-
-                )
-        );
+    @Deprecated(since = "6.0")
+    public Students save(Long id, Students student) {
+        Session session = getSession();
+        Transaction transaction = session.beginTransaction();
+        session.merge(student);
+        transaction.commit();
+        return student;
     }
 
-
     @Override
-    public Student save(Long id, Student student) {
-        if (id == null) {
-            String insertQuery = "INSERT INTO public.students (name, register, age, course) VALUES (?, ?, ?, ?)";
-            jdbcTemplate.update(insertQuery, student.getName(), student.getRegister(), student.getAge(), student.getCourse());
+    public Students delete(Long id){
+        Session session = getSession();
+        Transaction transaction = session.beginTransaction();
+
+        String hqlQuery = "DELETE FROM Students WHERE id = :studentId";
+        Query query = session.createQuery(hqlQuery);
+        query.setParameter("studentId", id);
+
+        int deletedCount = query.executeUpdate();
+        transaction.commit();
+
+        if (deletedCount > 0) {
+            return new Students();
         } else {
-            if (this.findById(id) != null) {
-                String updateQuery = "UPDATE public.students SET name = ?, register = ?, age = ?, course = ? WHERE id = ?";
-                jdbcTemplate.update(updateQuery, student.getName(), student.getRegister(), student.getAge(), student.getCourse(), student.getId());
-            } else {
-                throw new IllegalArgumentException("Não foi possível encontrar nenhum registro");
-            }
+            return null;
         }
-        return student;
-    }
-
-    @Override
-    public Student delete(Long id){
-        Student student = findById(id);
-        String deleteQuery = "DELETE FROM public.students WHERE id = ?";
-        jdbcTemplate.update(deleteQuery, new Object[]{id});
-        return student;
     }
 
 }
