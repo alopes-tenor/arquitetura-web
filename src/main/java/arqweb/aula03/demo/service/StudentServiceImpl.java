@@ -1,6 +1,6 @@
 package arqweb.aula03.demo.service;
 
-import arqweb.aula03.demo.model.Student;
+import arqweb.aula03.demo.model.Students;
 import arqweb.aula03.demo.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,27 +13,29 @@ public class StudentServiceImpl implements StudentService {
         this.studentRepository = studentRepository;
     }
     @Override
-    public List<Student> getAllStudents() {
+    public List<Students> getAllStudents() {
         return studentRepository.findAll();
     }
 
     @Override
-    public Student getStudentById(int id) {
+    public Students getStudentById(Long id) {
         return studentRepository.findById(id);
     }
 
     @Override
-    public Student createStudent(Student student) {
-        return studentRepository.save(student);
+    public Students createStudent(Long id, Students student) {
+        student.setRegister(student.getRegister());
+        return studentRepository.save(id, student);
     }
 
     @Override
-    public Student deleteStudentById(int id) {
+    public Students deleteStudentById(Long id) {
         return studentRepository.delete(id);
     }
 
     @Override
-    public Student updateStudentById(int id, Student student) {
-        return studentRepository.update(id, student);
+    public Students updateStudentById(Long id, Students student) {
+
+        return studentRepository.save(id, student);
     }
 }

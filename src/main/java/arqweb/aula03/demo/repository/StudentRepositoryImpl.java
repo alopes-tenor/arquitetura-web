@@ -1,64 +1,70 @@
 package arqweb.aula03.demo.repository;
 
+import arqweb.aula03.demo.config.HibernateConfig;
 import org.springframework.stereotype.Repository;
-import arqweb.aula03.demo.model.Student;
-import java.util.ArrayList;
+import arqweb.aula03.demo.model.Students;
+import jakarta.persistence.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+
 import java.util.List;
 
 @Repository
 public class StudentRepositoryImpl implements StudentRepository {
-    private final List<Student> students = new ArrayList<>();
-    private int nextId;
-
+    private final SessionFactory sessionFactory;
     public StudentRepositoryImpl() {
-        students.add(new Student(1, "Amanda Lopes"    , "222296", 19 , "ADS"));
-        students.add(new Student(2, "Sofia Belon" , "222716", 21 , "ADS"));
-        students.add(new Student(3, "Paulo Magro"   , "191004", 23 , "ENG. ELÉTRICA"));
-        students.add(new Student(4, "Gustavo de Almeida", "222597", 20, "ENG. COMPUTAÇÃO"));
-        students.add(new Student(5, "Luiz Obara"  , "222252", 21 , "ADS"));
-        nextId = 6;
+        this.sessionFactory = HibernateConfig.getSessionFactory();
     }
-
+    private Session getSession() {
+        return sessionFactory.getCurrentSession();
+    }
     @Override
-    public List<Student> findAll() {
+    public List<Students> findAll() {
+        Session session = getSession();
+        Transaction transaction = session.beginTransaction();
+        List<Students> students = session.createQuery("FROM Students", Students.class).getResultList();
+        transaction.commit();
         return students;
     }
 
     @Override
-    public Student findById(int id) {
-        return students.stream()
-                .filter(student -> student.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+    public Students findById(Long id) {
+        Session session = getSession();
+        Transaction transaction = session.beginTransaction();
+
+        Students student = session.find(Students.class, id);
+        transaction.commit();
+        return student;
     }
 
     @Override
-    public Student save(Student student) {
-        if (student.getId() == null) {
-            student.setId(nextId++);
-            students.add(student);
+    @Deprecated(since = "6.0")
+    public Students save(Long id, Students student) {
+        Session session = getSession();
+        Transaction transaction = session.beginTransaction();
+        session.merge(student);
+        transaction.commit();
+        return student;
+    }
+
+    @Override
+    public Students delete(Long id){
+        Session session = getSession();
+        Transaction transaction = session.beginTransaction();
+
+        String hqlQuery = "DELETE FROM Students WHERE id = :studentId";
+        Query query = session.createQuery(hqlQuery);
+        query.setParameter("studentId", id);
+
+        int deletedCount = query.executeUpdate();
+        transaction.commit();
+
+        if (deletedCount > 0) {
+            return new Students();
         } else {
-            students.removeIf(t -> t.getId().equals(student.getId()));
-            students.add(student);
+            return null;
         }
-        return student;
     }
 
-    @Override
-    public Student delete(int id){
-        Student deletedStudent = this.findById(id);
-        if (deletedStudent != null) {
-            students.removeIf(student -> student.getId().equals(id));
-        }
-        return deletedStudent;
-    }
-
-    @Override
-    public Student update(int id, Student student){
-        Student updateStudent = this.findById(id);
-        if (updateStudent != null) {
-            students.set(students.indexOf(updateStudent), student);
-        }
-        return student;
-    }
-}/
+}

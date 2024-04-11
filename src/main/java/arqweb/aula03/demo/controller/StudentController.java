@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import arqweb.aula03.demo.model.Student;
+import arqweb.aula03.demo.model.Students;
 import java.util.List;
 
 @RestController
@@ -18,27 +18,31 @@ public class StudentController {
     }
 
     @GetMapping
-    public List<Student> getAllStudents() {
+    public List<Students> getAllStudents() {
+
         return studentService.getAllStudents();
     }
 
     @GetMapping("/{id}")
-    public Student getStudentById(@PathVariable int id) {
+    public Students getStudentById(@PathVariable Long id) {
+
         return studentService.getStudentById(id);
     }
 
     @PostMapping("/add")
-    public Student createStudent(@RequestBody Student student) {
-        return studentService.createStudent(student);
+    public Students createStudent(@RequestBody Students student) {
+        Long id = null;
+        return studentService.createStudent(id, student);
     }
 
     @DeleteMapping("/{id}")
-    public Student deleteStudentById(@PathVariable int id) {
+    public Students deleteStudentById(@PathVariable Long id) {
+
         return studentService.deleteStudentById(id);
     }
 
     @PutMapping("/{id}")
-    public Student updateStudentById(@PathVariable int id, @RequestBody Student updateStudent){
+    public Students updateStudentById(@PathVariable Long id, @RequestBody Students updateStudent){
         return studentService.updateStudentById(id, updateStudent);
     }
 
